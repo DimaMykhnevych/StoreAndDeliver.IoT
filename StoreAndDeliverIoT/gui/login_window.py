@@ -48,7 +48,7 @@ class LoginWindow:
             self.error_text.clear()
             self.app.hide()
             self.mainWindow.window.show()
-            MainWindow.get_requests()
+            self.mainWindow.get_requests()
         else:
             if AuthResponse.login_error_code == 0:
                 self.error_text.value = "Username or password is invalid"

@@ -1,4 +1,4 @@
-from guizero import Text
+from guizero import Text,ListBox
 
 from core.models.request import Request
 from core.services.request_service import RequestService
@@ -11,7 +11,8 @@ class MainWindow:
     def __init__(self, window):
         self.window = window
         self.center_main_window()
-        Text(window, text="Select cargo")
+        Text(window, text="Current active requests")
+        self.listbox = ListBox(window, items=[])
 
     def center_main_window(self):
         screen_width = self.window.tk.winfo_screenwidth()
@@ -20,6 +21,7 @@ class MainWindow:
         y = (screen_height / 2) - (self.height / 2)
         self.window.tk.geometry('%dx%d+%d+%d' % (self.width, self.height, x, y))
 
-    @staticmethod
-    def get_requests():
+    def get_requests(self):
         RequestService.get_active_requests()
+        for cr in Request.cargoRequests:
+            self.listbox.append(cr.cargo.description)

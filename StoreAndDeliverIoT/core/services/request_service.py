@@ -4,6 +4,7 @@ from pprint import pprint
 import requests
 from core.constants.settings import AppSettings
 from core.models.auth_response import AuthResponse
+from core.models.cargo import Cargo
 from core.models.cargo_request import CargoRequest
 from core.models.request import Request
 from core.models.setting_bound import SettingBound
@@ -30,9 +31,18 @@ class RequestService:
         data = json.loads(r.text)
         Request.cargoRequests = list()
         for r in data['cargoRequests']:
+            cargo = Cargo(
+                id=r['cargo']['id'],
+                description=r['cargo']['description'],
+                amount=r['cargo']['amount'],
+                weight=r['cargo']['weight'],
+                length=r['cargo']['length'],
+                width=r['cargo']['width'],
+                height=r['cargo']['height'],
+            )
             cr = CargoRequest(
                 id=r['id'],
-                cargo=r['cargo']
+                cargo=cargo
             )
             Request.cargoRequests.append(cr)
         Request.settingsBound = list()
