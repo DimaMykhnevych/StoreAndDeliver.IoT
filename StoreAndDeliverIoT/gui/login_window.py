@@ -1,6 +1,8 @@
 import sys
 from threading import Thread
 from guizero import App, Text, TextBox, PushButton, Window
+
+from core.constants.Roles import Roles
 from core.models.auth_response import AuthResponse
 from core.services.auth_service import AuthService
 from gui.main_window import MainWindow
@@ -44,11 +46,13 @@ class LoginWindow:
 
     def validate_response(self):
         self.loading_text.clear()
-        if AuthResponse.is_authorized:
+        if AuthResponse.is_authorized and AuthResponse.user_info.role == Roles.carrier:
             self.error_text.clear()
             self.app.hide()
             self.mainWindow.window.show()
             self.mainWindow.get_requests()
+        elif AuthResponse.is_authorized and AuthResponse.user_info.role != Roles.carrier:
+            self.error_text.value = "Access denied"
         else:
             if AuthResponse.login_error_code == 0:
                 self.error_text.value = "Username or password is invalid"
