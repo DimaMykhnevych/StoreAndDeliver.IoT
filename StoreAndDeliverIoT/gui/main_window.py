@@ -3,6 +3,7 @@ from guizero import Text, ListBox, Box, PushButton
 from core.constants.indicators_settings import IndicatorsSettings
 from core.models.request import Request
 from core.services.request_service import RequestService
+from core.services.indicators_service import IndicatorsService
 
 
 class MainWindow:
@@ -21,8 +22,16 @@ class MainWindow:
         self.luminosity_text.visible = False
         self.temperature_text = Text(window, text="")
         self.temperature_text.visible = False
-        self.start_button = PushButton(window, text="Start")
-        self.start_button = PushButton(window, text="Stop")
+        self.start_button = PushButton(window, text="Start", command=self.on_start_indicators)
+        self.start_button = PushButton(window, text="Stop", command=self.on_stop_indicators)
+        
+        self.indicators_service = IndicatorsService()
+        
+    def on_start_indicators(self):
+        self.indicators_service.start_indicators()
+        
+    def on_stop_indicators(self):
+        self.indicators_service.stop_indicators()
 
     def center_main_window(self):
         screen_width = self.window.tk.winfo_screenwidth()
