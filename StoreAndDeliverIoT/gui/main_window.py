@@ -7,8 +7,8 @@ from core.services.indicators_service import IndicatorsService
 
 
 class MainWindow:
-    width = 600
-    height = 400
+    width = 700
+    height = 500
 
     def __init__(self, window):
         self.window = window
@@ -23,9 +23,16 @@ class MainWindow:
         self.temperature_text = Text(window, text="")
         self.temperature_text.visible = False
         self.start_button = PushButton(window, text="Start", command=self.on_start_indicators)
-        self.start_button = PushButton(window, text="Stop", command=self.on_stop_indicators)
-        
+        self.stop_button = PushButton(window, text="Stop", command=self.on_stop_indicators)
+        self.enable_security_mode = PushButton(window, text="Enable security mode", command=self.on_enable_security_mode)
+        self.disable_security_mode = PushButton(window, text="Disable security mode", command=self.on_disable_security_mode)
         self.indicators_service = IndicatorsService()
+        
+    def on_enable_security_mode(self):
+        self.indicators_service.enable_security_mode()
+        
+    def on_disable_security_mode(self):
+        self.indicators_service.disable_security_mode()
         
     def on_start_indicators(self):
         self.indicators_service.start_indicators()
