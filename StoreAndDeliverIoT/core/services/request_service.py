@@ -1,5 +1,4 @@
 import json
-from pprint import pprint
 
 import requests
 from core.constants.settings import AppSettings
