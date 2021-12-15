@@ -39,7 +39,13 @@ en = {
     'log_in': 'Log In',
     'access_denied': 'Access denied',
     'invalid_credentials': 'Username or password is invalid',
-    'email_confirmation_required': 'You need to confirm your email'
+    'email_confirmation_required': 'You need to confirm your email',
+    'low_temperature': 'The temperature is below the permissible value. Increasing the temperature.',
+    'high_temperature': 'The temperature is higher than the permissible value. Lowering the temperature.',
+    'low_humidity': 'The humidity is below the permissible value. Increasing the humidity.',
+    'high_humidity': 'The humidity is higher than the permissible value. Lowering the humidity.',
+    'low_luminosity': 'The luminosity is below the permissible value. Increasing the luminosity.',
+    'high_luminosity': 'The luminosity is higher than the permissible value. Lowering the luminosity.'
 }
 ua = {
     'about': 'Інформація',
@@ -79,7 +85,13 @@ ua = {
     'log_in': 'Увійти',
     'access_denied': 'Доступ заборонено',
     'invalid_credentials': 'Ім\'я або пароль невірні',
-    'email_confirmation_required': 'Підтвердіть свою електрону пошту'
+    'email_confirmation_required': 'Підтвердіть свою електрону пошту',
+    'low_temperature': 'Температура нижче за допустиме значення. Підвищення температури.',
+    'high_temperature': 'Температура вижче за допустиме значення. Зниження температури.',
+    'low_humidity': 'Вологість нижче за допустиме значення. Підвищення вологості.',
+    'high_humidity': 'Вологість вижче за допустиме значення. Зниження вологості.',
+    'low_luminosity': 'Освітленність нижче за допустиме значення. Підвищення освітленності.',
+    'high_luminosity': 'Освітленність вижче за допустиме значення. Зниження освітленності.'
 }
 ru = {
     'about': 'Информация',
@@ -119,7 +131,13 @@ ru = {
     'log_in': 'Войти',
     'access_denied': 'Доступ запрещен',
     'invalid_credentials': 'Имя или пароль неверны',
-    'email_confirmation_required': 'Подтвердите свою электронную почту'
+    'email_confirmation_required': 'Подтвердите свою электронную почту',
+    'low_temperature': 'Температура ниже допустимого значения. Повышение температуры.',
+    'high_temperature': 'Температура выше допустимого значения. Понижение температуры.',
+    'low_humidity': 'Влажность ниже допустимого значения. Повышение влажности.',
+    'high_humidity': 'Влажность выше допустимого значения. Понижение влажности.',
+    'low_luminosity': 'Освещенность ниже допустимого значения. Повышение освещенности.',
+    'high_luminosity': 'Освещенность выше допустимого значения. Понижение освещенности.'
 }
 
 

@@ -22,8 +22,8 @@ from core.services.indicators_service import IndicatorsService
 
 
 class MainWindow:
-    width = 700
-    height = 500
+    width = 750
+    height = 525
     website_link = "https://dimamykhnevych.github.io/StoreAndDeliver.UI/home"
 
     def __init__(self, window):
@@ -43,7 +43,7 @@ class MainWindow:
         self.window = window
         self.window.bg = (240, 240, 218)
         self.selected_request_type = RequestType.DELIVER
-        self.indicators_service = IndicatorsService()
+        self.indicators_service = IndicatorsService(self.on_indicators_recorded)
         self.center_main_window()
         self.main_header = Text(window, text=_('current_active_requests'), color="blue", size=14)
         self.request_type_choice = ButtonGroup(window,
@@ -70,6 +70,16 @@ class MainWindow:
         self.disable_security_mode = PushButton(window,
                                                 text=_('disable_security_mode'),
                                                 command=self.on_disable_security_mode)
+
+        self.temperature_out_of_bound_text = Text(window, text="", color="red")
+        self.temperature_out_of_bound_text.visible = False
+        self.humidity_out_of_bound_text = Text(window, text="", color="red")
+        self.humidity_out_of_bound_text.visible = False
+        self.luminosity_out_of_bound_text = Text(window, text="", color="red")
+        self.luminosity_out_of_bound_text.visible = False
+        self.is_temperature_higher_than_bound = None
+        self.is_luminosity_higher_than_bound = None
+        self.is_humidity_higher_than_bound = None
         self.hide_security_mode_actions()
 
     def on_language_change(self, language):
@@ -98,6 +108,7 @@ class MainWindow:
         self.disable_security_mode.visible = True
 
     def on_request_type_changed(self):
+        self.clear_indicators_warning()
         string_request_type_option = self.request_type_choice.value
         self.selected_request_type = RequestType.DELIVER
         self.hide_security_mode_actions()
@@ -107,16 +118,102 @@ class MainWindow:
         self.update_request_list()
 
     def on_enable_security_mode(self):
+        self.request_type_choice.enabled = False
         self.indicators_service.enable_security_mode()
 
     def on_disable_security_mode(self):
+        self.request_type_choice.enabled = True
         self.indicators_service.disable_security_mode()
 
     def on_start_indicators(self):
+        self.request_type_choice.enabled = False
         self.indicators_service.start_indicators()
 
     def on_stop_indicators(self):
+        self.clear_indicators_warning()
+        self.request_type_choice.enabled = True
         self.indicators_service.stop_indicators()
+
+    def clear_indicators_warning(self):
+        self.temperature_out_of_bound_text.visible = False
+        self.humidity_out_of_bound_text.visible = False
+        self.luminosity_out_of_bound_text.visible = False
+
+    def on_indicators_recorded(self, snapshot: AddSnapshot):
+        if any(elem.setting == IndicatorsSettings.temperature for elem in Request.settingsBound):
+            temperature_setting = self.get_needed_setting(IndicatorsSettings.temperature)
+            if snapshot.temperature < self.convert_temperature_to_celsius(temperature_setting.minValue):
+                self.temperature_out_of_bound_text.visible = True
+                self.temperature_out_of_bound_text.value = _('low_temperature')
+                self.is_temperature_higher_than_bound = False
+            elif snapshot.temperature > self.convert_temperature_to_celsius(temperature_setting.maxValue):
+                self.temperature_out_of_bound_text.visible = True
+                self.temperature_out_of_bound_text.value = _('high_temperature')
+                self.is_temperature_higher_than_bound = True
+            else:
+                self.temperature_out_of_bound_text.visible = False
+                self.temperature_out_of_bound_text.value = ""
+                self.is_temperature_higher_than_bound = None
+        if any(elem.setting == IndicatorsSettings.humidity for elem in Request.settingsBound):
+            humidity_setting = self.get_needed_setting(IndicatorsSettings.humidity)
+            if snapshot.humidity < humidity_setting.minValue:
+                self.humidity_out_of_bound_text.visible = True
+                self.humidity_out_of_bound_text.value = _('low_humidity')
+                self.is_humidity_higher_than_bound = False
+            elif snapshot.humidity > humidity_setting.maxValue:
+                self.humidity_out_of_bound_text.visible = True
+                self.humidity_out_of_bound_text.value = _('high_humidity')
+                self.is_humidity_higher_than_bound = True
+            else:
+                self.humidity_out_of_bound_text.visible = False
+                self.humidity_out_of_bound_text.value = ""
+                self.is_humidity_higher_than_bound = None
+        if any(elem.setting == IndicatorsSettings.luminosity for elem in Request.settingsBound):
+            luminosity_setting = self.get_needed_setting(IndicatorsSettings.luminosity)
+            if snapshot.luminosity < luminosity_setting.minValue:
+                self.luminosity_out_of_bound_text.visible = True
+                self.luminosity_out_of_bound_text.value = _('low_luminosity')
+                self.is_luminosity_higher_than_bound = False
+            elif snapshot.luminosity > luminosity_setting.maxValue:
+                self.luminosity_out_of_bound_text.visible = True
+                self.luminosity_out_of_bound_text.value = _('high_luminosity')
+                self.is_luminosity_higher_than_bound = True
+            else:
+                self.luminosity_out_of_bound_text.visible = False
+                self.luminosity_out_of_bound_text.value = ""
+                self.is_luminosity_higher_than_bound = None
+        return
+
+    def get_needed_warning_message(self, is_higher_than_bound, setting: IndicatorsSettings):
+        if is_higher_than_bound:
+            if setting == IndicatorsSettings.temperature:
+                return _('high_temperature')
+            elif setting == IndicatorsSettings.humidity:
+                return _('high_humidity')
+            elif setting == IndicatorsSettings.luminosity:
+                return _('high_luminosity')
+        elif is_higher_than_bound is None:
+            return ""
+        elif not is_higher_than_bound:
+            if setting == IndicatorsSettings.temperature:
+                return _('low_temperature')
+            elif setting == IndicatorsSettings.humidity:
+                return _('low_humidity')
+            elif setting == IndicatorsSettings.luminosity:
+                return _('low_luminosity')
+
+
+    def convert_temperature_to_celsius(self, temperature):
+        if UserSettings.temperature_unit == TemperatureUnit.FAHRENHEIT:
+            return (temperature - 32) * 5 / 9
+        elif UserSettings.temperature_unit == TemperatureUnit.KELVIN:
+            return temperature - 273.15
+        return temperature
+
+    def get_needed_setting(self, setting_name):
+        for setting in Request.settingsBound:
+            if setting.setting == setting_name:
+                return setting
 
     def center_main_window(self):
         screen_width = self.window.tk.winfo_screenwidth()
@@ -185,5 +282,11 @@ class MainWindow:
         self.stop_button.text = _('stop')
         self.enable_security_mode.text = _('enable_security_mode')
         self.disable_security_mode.text = _('disable_security_mode')
+        self.temperature_out_of_bound_text.value = \
+            self.get_needed_warning_message(self.is_temperature_higher_than_bound, IndicatorsSettings.temperature)
+        self.humidity_out_of_bound_text.value = \
+            self.get_needed_warning_message(self.is_humidity_higher_than_bound, IndicatorsSettings.humidity)
+        self.luminosity_out_of_bound_text.value = \
+            self.get_needed_warning_message(self.is_luminosity_higher_than_bound, IndicatorsSettings.luminosity)
         if need_to_update_requests:
             self.update_request_list()
