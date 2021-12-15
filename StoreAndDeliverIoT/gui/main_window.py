@@ -1,4 +1,4 @@
-from guizero import Text, ListBox, PushButton, ButtonGroup
+from guizero import Text, ListBox, PushButton, ButtonGroup, MenuBar
 
 from core.constants.indicators_settings import IndicatorsSettings
 from core.constants.language import Language
@@ -13,6 +13,7 @@ from core.models.add_snapshot import AddSnapshot
 from core.models.get_request import GetRequest
 from core.models.request import Request
 from core.models.units import Units
+from core.services.custom_translate_service import _
 from core.services.indicators_api_service import IndicatorsApiService
 from core.services.request_service import RequestService
 from core.services.indicators_service import IndicatorsService
@@ -21,9 +22,17 @@ from core.services.indicators_service import IndicatorsService
 class MainWindow:
     width = 700
     height = 500
+    website_link = "https://dimamykhnevych.github.io/StoreAndDeliver.UI/home"
 
     def __init__(self, window):
+        self.menu_bar = MenuBar(window,
+                                toplevel=[_("about")],
+                                options=[
+                                    [["Program", self.on_program_about_click],
+                                     ["Developers", self.on_developers_about_click]]
+                                ])
         self.window = window
+        self.window.bg = (240, 240, 218)
         self.selected_request_type = RequestType.DELIVER
         self.indicators_service = IndicatorsService()
         self.center_main_window()
@@ -53,6 +62,15 @@ class MainWindow:
                                                 text="Disable security mode",
                                                 command=self.on_disable_security_mode)
         self.hide_security_mode_actions()
+
+    def on_program_about_click(self):
+        self.window.info("About program", "StoreAndDeliver IoT program to track environmental conditions of stored "
+                                          f"and delivered cargo.\nLink to website: {self.website_link}")
+
+    def on_developers_about_click(self):
+        self.window.info("About developers", "Program was developed by Dmytro Mykhnevych, "
+                                             "student of Kharkiv National University of Radio Electronics\n"
+                                             "Email: dmytro.mykhnevych@nure.ua")
 
     def hide_security_mode_actions(self):
         self.enable_security_mode.visible = False
