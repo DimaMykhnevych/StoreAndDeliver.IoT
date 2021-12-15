@@ -1,4 +1,4 @@
-from guizero import Text, ListBox, PushButton
+from guizero import Text, ListBox, PushButton, ButtonGroup
 
 from core.constants.indicators_settings import IndicatorsSettings
 from core.constants.language import Language
@@ -24,8 +24,18 @@ class MainWindow:
 
     def __init__(self, window):
         self.window = window
+        self.selected_request_type = RequestType.DELIVER
+        self.indicators_service = IndicatorsService()
         self.center_main_window()
         Text(window, text="Current active cargo requests", color="blue", size=14)
+        self.request_type_choice = ButtonGroup(window,
+                                               options=[["Store", RequestType.STORE.name],
+                                                        ["Deliver", RequestType.DELIVER.name]],
+                                               selected=self.selected_request_type.name,
+                                               horizontal="True",
+                                               command=self.on_request_type_changed)
+        self.loading_text = Text(window, text="Loading...", color="blue")
+        self.loading_text.visible = False
         self.listbox = ListBox(window, items=[])
         Text(window, text="Required Indicators Settings", color="blue", size=14)
         self.humidity_text = Text(window, text="")
@@ -42,11 +52,29 @@ class MainWindow:
         self.disable_security_mode = PushButton(window,
                                                 text="Disable security mode",
                                                 command=self.on_disable_security_mode)
-        self.indicators_service = IndicatorsService()
-        
+        self.hide_security_mode_actions()
+
+    def hide_security_mode_actions(self):
+        self.enable_security_mode.visible = False
+        self.disable_security_mode.visible = False
+
+    def show_security_mode_actions(self):
+        self.enable_security_mode.visible = True
+        self.disable_security_mode.visible = True
+
+    def on_request_type_changed(self):
+        string_request_type_option = self.request_type_choice.value
+        self.selected_request_type = RequestType.DELIVER
+        self.hide_security_mode_actions()
+        if string_request_type_option == RequestType.STORE.name:
+            self.selected_request_type = RequestType.STORE
+            self.show_security_mode_actions()
+        self.listbox.clear()
+        self.get_requests()
+
     def on_enable_security_mode(self):
         self.indicators_service.enable_security_mode()
-        
+
     def on_disable_security_mode(self):
         self.indicators_service.disable_security_mode()
 
@@ -65,18 +93,20 @@ class MainWindow:
 
     def get_requests(self):
         get_request = GetRequest(
-            requestType=RequestType.DELIVER,
+            requestType=self.selected_request_type,
             units=Units(
                 weight=WeightUnit.KILOGRAMS,
                 length=LengthUnit.METERS,
-                temperature=TemperatureUnit.FAHRENHEIT,
+                temperature=TemperatureUnit.CELSIUS,
                 humidity=HumidityUnit.PERCENTAGE,
                 luminosity=LuminosityUnit.LUX
             ),
             currentLanguage=Language.en,
             status=RequestStatus.IN_PROGRESS
         )
+        self.loading_text.visible = True
         RequestService.get_active_requests(get_request)
+        self.loading_text.visible = False
         for cr in Request.cargoRequests:
             self.listbox.append(cr.cargo.description)
         for setting in Request.settingsBound:
