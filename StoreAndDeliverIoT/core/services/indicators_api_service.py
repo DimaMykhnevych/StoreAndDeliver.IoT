@@ -15,7 +15,8 @@ class IndicatorsApiService:
             'requestType': snapshot.requestType.value
         }
         headers = {'Authorization': f'Bearer {AuthResponse.token}'}
-        requests.post(url=url, json=data, headers=headers)
+        res = requests.post(url=url, json=data, headers=headers)
+        print(res)
 
     @staticmethod
     def send_motion_detected_email(language: str):

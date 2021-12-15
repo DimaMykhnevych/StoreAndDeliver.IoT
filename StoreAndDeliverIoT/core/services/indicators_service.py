@@ -3,10 +3,15 @@ import RPi.GPIO as GPIO
 import Adafruit_DHT
 import time
 import random
+from core.models.add_snapshot import AddSnapshot
+from core.services.indicators_api_service import IndicatorsApiService
+from core.models.user_settings import UserSettings
 
 
 class IndicatorsService:
-    def __init__(self):
+    def __init__(self, on_indicators_recorded_callback, get_request_type):
+        self.on_indicators_recorded = on_indicators_recorded_callback
+        self.get_current_request_type = get_request_type
         # humidity and temperature
         self.DHT_SENSOR = Adafruit_DHT.DHT11
         self.DHT_PIN = 4
@@ -48,6 +53,8 @@ class IndicatorsService:
             input_state = GPIO.input(self.PIR_PIN)
             if input_state:
                 print("Motion detected")
+                IndicatorsApiService.send_motion_detected_email(UserSettings.language)
+                print("Motion detected email was send successfully")
             else:
                 print("Motion wasn't detected")
             if stop():
@@ -60,8 +67,15 @@ class IndicatorsService:
             humidity, temperature = Adafruit_DHT.read(self.DHT_SENSOR, self.DHT_PIN)
             if humidity is not None and temperature is not None:
                 print("Temp={0:0.01f}C Humidity={1:0.1f}%".format(temperature, humidity))
-                print("Luminosity={0:0.01f}Lux".format(self.get_luminosity(GPIO.input(self.LIGHT_PIN))))
-            time.sleep(5)
+                current_luminosity = self.get_luminosity(GPIO.input(self.LIGHT_PIN))
+                print("Luminosity={0:0.01f}Lux".format(current_luminosity))
+                current_request_type = self.get_current_request_type()
+                add_snapshot = AddSnapshot(temperature=temperature, humidity=humidity, luminosity=current_luminosity,
+                                           requestType=current_request_type)
+                IndicatorsApiService.add_cargo_snapshot(add_snapshot)
+                print("Snapshot was saved successfully")
+                self.on_indicators_recorded(add_snapshot)
+            time.sleep(15)
             if stop():
                 break
 

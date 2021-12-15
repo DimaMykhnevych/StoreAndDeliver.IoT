@@ -43,7 +43,7 @@ class MainWindow:
         self.window = window
         self.window.bg = (240, 240, 218)
         self.selected_request_type = RequestType.DELIVER
-        self.indicators_service = IndicatorsService(self.on_indicators_recorded)
+        self.indicators_service = IndicatorsService(self.on_indicators_recorded, self.get_request_type)
         self.center_main_window()
         self.main_header = Text(window, text=_('current_active_requests'), color="blue", size=14)
         self.request_type_choice = ButtonGroup(window,
@@ -81,6 +81,9 @@ class MainWindow:
         self.is_luminosity_higher_than_bound = None
         self.is_humidity_higher_than_bound = None
         self.hide_security_mode_actions()
+        
+    def get_request_type(self):
+        return self.selected_request_type
 
     def on_language_change(self, language):
         UserSettings.language = language
