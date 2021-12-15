@@ -1,7 +1,19 @@
-from guizero import Text, ListBox, Box, PushButton
+from guizero import Text, ListBox, PushButton
 
 from core.constants.indicators_settings import IndicatorsSettings
+from core.constants.language import Language
+from core.enums.humidity_unit import HumidityUnit
+from core.enums.length_unit import LengthUnit
+from core.enums.luminosity_unit import LuminosityUnit
+from core.enums.request_status import RequestStatus
+from core.enums.request_type import RequestType
+from core.enums.temperature_unit import TemperatureUnit
+from core.enums.weight_unit import WeightUnit
+from core.models.add_snapshot import AddSnapshot
+from core.models.get_request import GetRequest
 from core.models.request import Request
+from core.models.units import Units
+from core.services.indicators_api_service import IndicatorsApiService
 from core.services.request_service import RequestService
 from core.services.indicators_service import IndicatorsService
 
@@ -24,8 +36,12 @@ class MainWindow:
         self.temperature_text.visible = False
         self.start_button = PushButton(window, text="Start", command=self.on_start_indicators)
         self.stop_button = PushButton(window, text="Stop", command=self.on_stop_indicators)
-        self.enable_security_mode = PushButton(window, text="Enable security mode", command=self.on_enable_security_mode)
-        self.disable_security_mode = PushButton(window, text="Disable security mode", command=self.on_disable_security_mode)
+        self.enable_security_mode = PushButton(window,
+                                               text="Enable security mode",
+                                               command=self.on_enable_security_mode)
+        self.disable_security_mode = PushButton(window,
+                                                text="Disable security mode",
+                                                command=self.on_disable_security_mode)
         self.indicators_service = IndicatorsService()
         
     def on_enable_security_mode(self):
@@ -33,10 +49,10 @@ class MainWindow:
         
     def on_disable_security_mode(self):
         self.indicators_service.disable_security_mode()
-        
+
     def on_start_indicators(self):
         self.indicators_service.start_indicators()
-        
+
     def on_stop_indicators(self):
         self.indicators_service.stop_indicators()
 
@@ -48,7 +64,19 @@ class MainWindow:
         self.window.tk.geometry('%dx%d+%d+%d' % (self.width, self.height, x, y))
 
     def get_requests(self):
-        RequestService.get_active_requests()
+        get_request = GetRequest(
+            requestType=RequestType.DELIVER,
+            units=Units(
+                weight=WeightUnit.KILOGRAMS,
+                length=LengthUnit.METERS,
+                temperature=TemperatureUnit.FAHRENHEIT,
+                humidity=HumidityUnit.PERCENTAGE,
+                luminosity=LuminosityUnit.LUX
+            ),
+            currentLanguage=Language.en,
+            status=RequestStatus.IN_PROGRESS
+        )
+        RequestService.get_active_requests(get_request)
         for cr in Request.cargoRequests:
             self.listbox.append(cr.cargo.description)
         for setting in Request.settingsBound:

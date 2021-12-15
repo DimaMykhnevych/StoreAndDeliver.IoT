@@ -5,25 +5,26 @@ from core.constants.settings import AppSettings
 from core.models.auth_response import AuthResponse
 from core.models.cargo import Cargo
 from core.models.cargo_request import CargoRequest
+from core.models.get_request import GetRequest
 from core.models.request import Request
 from core.models.setting_bound import SettingBound
 
 
 class RequestService:
     @staticmethod
-    def get_active_requests():
+    def get_active_requests(get_request: GetRequest):
         url = f"{AppSettings.api_host}/cargoSession/carrierSessionRequests"
         data = {
-            "requestType": 1,
+            "requestType": get_request.requestType.value,
             "units": {
-                "weight": 0,
-                "length": 0,
-                "temperature": 0,
-                "humidity": 0,
-                "luminosity": 0
+                "weight": get_request.units.weight.value,
+                "length": get_request.units.length.value,
+                "temperature": get_request.units.temperature.value,
+                "humidity": get_request.units.humidity.value,
+                "luminosity": get_request.units.luminosity.value
             },
-            "currentLanguage": "en",
-            "status": 0
+            "currentLanguage": get_request.currentLanguage,
+            "status": get_request.status.value
         }
         headers = {'Authorization': f'Bearer {AuthResponse.token}'}
         r = requests.post(url=url, json=data, headers=headers)
