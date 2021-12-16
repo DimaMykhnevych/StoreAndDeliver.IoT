@@ -285,6 +285,7 @@ class MainWindow:
         self.stop_button.text = _('stop')
         self.enable_security_mode.text = _('enable_security_mode')
         self.disable_security_mode.text = _('disable_security_mode')
+        self.window.title = _('dashboard')
         self.temperature_out_of_bound_text.value = \
             self.get_needed_warning_message(self.is_temperature_higher_than_bound, IndicatorsSettings.temperature)
         self.humidity_out_of_bound_text.value = \
