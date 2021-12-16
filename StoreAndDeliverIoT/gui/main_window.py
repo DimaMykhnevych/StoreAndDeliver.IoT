@@ -10,13 +10,11 @@ from core.enums.request_type import RequestType
 from core.enums.temperature_unit import TemperatureUnit
 from core.enums.weight_unit import WeightUnit
 from core.models.add_snapshot import AddSnapshot
-from core.models.auth_response import AuthResponse
 from core.models.get_request import GetRequest
 from core.models.request import Request
 from core.models.units import Units
 from core.models.user_settings import UserSettings
 from core.services.custom_translate_service import _, get_temperature_unit_symbol
-from core.services.indicators_api_service import IndicatorsApiService
 from core.services.request_service import RequestService
 from core.services.indicators_service import IndicatorsService
 

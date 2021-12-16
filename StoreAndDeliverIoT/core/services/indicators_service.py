@@ -61,7 +61,6 @@ class IndicatorsService:
                 break
 
     def start_indicators_loop(self, stop):
-        count = 0
         self.indicators_disabled = False
         while True:
             humidity, temperature = Adafruit_DHT.read(self.DHT_SENSOR, self.DHT_PIN)
