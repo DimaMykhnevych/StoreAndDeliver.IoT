@@ -9,7 +9,7 @@ from core.models.user_settings import UserSettings
 
 
 class IndicatorsService:
-    def __init__(self, on_indicators_recorded_callback, get_request_type):
+    def __init__(self, on_indicators_recorded_callback, get_request_type, push_button_callback):
         self.on_indicators_recorded = on_indicators_recorded_callback
         self.get_current_request_type = get_request_type
         # humidity and temperature
@@ -27,6 +27,12 @@ class IndicatorsService:
         GPIO.setup(self.PIR_PIN, GPIO.IN)
         self.security_mode_loop_thread = Thread()
         self.security_mode_disabled = False
+        # push button
+        GPIO.setwarnings(False)
+        self.BUTTON_PIN = 15
+        GPIO.setup(self.BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.add_event_detect(self.BUTTON_PIN, GPIO.RISING, callback=push_button_callback)
+        
 
     def start_indicators(self):
         self.indicators_loop_thread = Thread(target=self.start_indicators_loop,
@@ -74,7 +80,7 @@ class IndicatorsService:
                 IndicatorsApiService.add_cargo_snapshot(add_snapshot)
                 print("Snapshot was saved successfully")
                 self.on_indicators_recorded(add_snapshot)
-            time.sleep(15)
+            time.sleep(10)
             if stop():
                 break
 

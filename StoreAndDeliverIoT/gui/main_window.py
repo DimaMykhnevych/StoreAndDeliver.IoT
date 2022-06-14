@@ -17,12 +17,15 @@ from core.models.user_settings import UserSettings
 from core.services.custom_translate_service import _, get_temperature_unit_symbol
 from core.services.request_service import RequestService
 from core.services.indicators_service import IndicatorsService
+import time
+import datetime
 
 
 class MainWindow:
-    width = 750
-    height = 525
+    width = 800
+    height = 600
     website_link = "https://dimamykhnevych.github.io/StoreAndDeliver.UI/home"
+    toggle_indicators = False
 
     def __init__(self, window):
         self.menu_bar = MenuBar(window,
@@ -41,7 +44,7 @@ class MainWindow:
         self.window = window
         self.window.bg = (240, 240, 218)
         self.selected_request_type = RequestType.DELIVER
-        self.indicators_service = IndicatorsService(self.on_indicators_recorded, self.get_request_type)
+        self.indicators_service = IndicatorsService(self.on_indicators_recorded, self.get_request_type, self.push_button_callback)
         self.center_main_window()
         self.main_header = Text(window, text=_('current_active_requests'), color="blue", size=14)
         self.request_type_choice = ButtonGroup(window,
@@ -79,6 +82,7 @@ class MainWindow:
         self.is_luminosity_higher_than_bound = None
         self.is_humidity_higher_than_bound = None
         self.hide_security_mode_actions()
+        self.datetime_toggle = datetime.datetime.now()
         
     def get_request_type(self):
         return self.selected_request_type
@@ -139,6 +143,22 @@ class MainWindow:
         self.temperature_out_of_bound_text.visible = False
         self.humidity_out_of_bound_text.visible = False
         self.luminosity_out_of_bound_text.visible = False
+    
+        
+    def push_button_callback(self, channel):
+        current_date = datetime.datetime.now()
+        date_dif = current_date - self.datetime_toggle
+        print(date_dif.total_seconds())
+        if(date_dif.total_seconds() > 2):
+            self.toggle_indicators = not self.toggle_indicators
+            if self.toggle_indicators:
+                print("Starting indicators recording")
+                self.on_start_indicators()
+            else:
+                print("Stoping indicators recording")
+                self.on_stop_indicators()
+        self.datetime_toggle = datetime.datetime.now()
+    
 
     def on_indicators_recorded(self, snapshot: AddSnapshot):
         if any(elem.setting == IndicatorsSettings.temperature for elem in Request.settingsBound):
@@ -225,6 +245,7 @@ class MainWindow:
 
     def get_requests(self):
         self.update_view(False)
+        self.clear_indicators_settings()
         get_request = GetRequest(
             requestType=self.selected_request_type,
             units=Units(
@@ -258,6 +279,11 @@ class MainWindow:
     def update_request_list(self):
         self.listbox.clear()
         self.get_requests()
+        
+    def clear_indicators_settings(self):
+        self.temperature_text.visible = False
+        self.humidity_text.visible = False
+        self.luminosity_text.visible = False
 
     def update_view(self, need_to_update_requests=True):
         self.menu_bar = MenuBar(self.window,
